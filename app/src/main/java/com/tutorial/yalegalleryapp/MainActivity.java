@@ -85,11 +85,11 @@ public class MainActivity extends AppCompatActivity {
         mRecyclerView.setHasFixedSize(true);
 
         // Initialize GridLayoutManager
-        mLayoutManager = new GridLayoutManager(getApplicationContext(), 2);
+        mLayoutManager = new GridLayoutManager(getApplicationContext(), 3);
         mRecyclerView.setLayoutManager(mLayoutManager);
 
         ArrayList<CreateList> createLists = prepareData();
-        MyAdapter adapter = new MyAdapter(getApplicationContext(), createLists);
+        GalleryImageAdapter adapter = new GalleryImageAdapter(getApplicationContext(), createLists);
         mRecyclerView.setAdapter(adapter);
 
         // TODO: figure out
