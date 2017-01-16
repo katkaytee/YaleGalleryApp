@@ -4,6 +4,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.widget.AdapterView;
 
 import java.util.ArrayList;
 
@@ -15,7 +16,9 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String API_KEY = BuildConfig.API_KEY;
     private static final String SECRET = BuildConfig.SECRET;
-    private static final String url = "http://api.flickr.com/services/rest/?";
+    private static String flickr_url = "http://api.flickr.com/services/rest/?";
+
+
 
     //Flickr flickr = new Flickr(API_KEY, SECRET, new REST());
 
@@ -60,18 +63,22 @@ public class MainActivity extends AppCompatActivity {
             R.drawable.touch_icon_0,
     };
 
-    // Go through all the titles and make a CreateList for each to hold
+    // Go through all the titles and make a ItemList for each to hold
     // image information
-    private ArrayList<CreateList> prepareData() {
-        ArrayList<CreateList> image = new ArrayList<>();
+    private ArrayList<ItemList> prepareData() {
+        ArrayList<ItemList> image = new ArrayList<>();
         for(int i = 0; i < image_titles.length; i++) {
-            CreateList createList = new CreateList();
-            createList.setImage_title(image_titles[i]);
-            createList.setImage_ID(image_ids[i]);
-            image.add(createList);
+            ItemList itemList = new ItemList();
+            itemList.setImage_title(image_titles[i]);
+            itemList.setImage_ID(image_ids[i]);
+            image.add(itemList);
         }
         return image;
     }
+
+    // TODO: get photos from Flickr
+
+
 
 
 
@@ -88,17 +95,16 @@ public class MainActivity extends AppCompatActivity {
         mLayoutManager = new GridLayoutManager(getApplicationContext(), 3);
         mRecyclerView.setLayoutManager(mLayoutManager);
 
-        ArrayList<CreateList> createLists = prepareData();
-        GalleryImageAdapter adapter = new GalleryImageAdapter(getApplicationContext(), createLists);
+        ArrayList<ItemList> itemLists = prepareData();
+        GalleryImageAdapter adapter = new GalleryImageAdapter(getApplicationContext(), itemLists);
         mRecyclerView.setAdapter(adapter);
 
-        // TODO: figure out
-       // String NSID = flickr.people.findByUsername();
+
     }
 }
 
 // TODO:
-// Use the url format specified by the API, then use volley to make the
+// Use the url format specified by the API, then use volley/picasso to make the
 // request using the url
 
 

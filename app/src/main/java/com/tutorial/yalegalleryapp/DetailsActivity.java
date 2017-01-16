@@ -16,10 +16,12 @@ public class DetailsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_details);
 
-        String title = getIntent().getStringExtra("title");
-        // TODO: Figure out why we need to use bitmap here?
-        Bitmap bitmap = getIntent().getParcelableExtra("image");
+        // Get extras
+        Bundle extras = getIntent().getExtras();
+        Bitmap bitmap = extras.getParcelable("imagebitmap");
+        String title = extras.getString("title");
 
+        // Set the views
         TextView titleTextView = (TextView) findViewById(R.id.title_details);
         titleTextView.setText(title);
 

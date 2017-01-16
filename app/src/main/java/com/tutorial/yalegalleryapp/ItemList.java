@@ -4,7 +4,7 @@ package com.tutorial.yalegalleryapp;
  * Created by Katherine on 1/15/17.
  * Class to hold information about an image in its cell
  */
-public class CreateList {
+public class ItemList {
 
     private String image_title;
     private Integer image_id;
