@@ -4,83 +4,73 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.widget.AdapterView;
+import android.util.Log;
+import android.widget.Toast;
+
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.VolleyLog;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
-
-//import com.flickr4java.flickr.Flickr;
-//import com.flickr4java.flickr.REST;
+import java.util.List;
 
 
 public class MainActivity extends AppCompatActivity {
 
-    private static final String API_KEY = BuildConfig.API_KEY;
-    private static final String SECRET = BuildConfig.SECRET;
-    private static String flickr_url = "http://api.flickr.com/services/rest/?";
-
-
-
-    //Flickr flickr = new Flickr(API_KEY, SECRET, new REST());
+    private static final String TAG = MainActivity.class.getName();
+    private static final String USER = "12208415@N08"; // User ID for yaleuniversity
 
     private RecyclerView mRecyclerView;
     private RecyclerView.LayoutManager mLayoutManager;
-    // TODO: Make these into res strings?
-    private String mApiString = "&api_key=" + API_KEY;
-    private String mUserIdString = "&user_id=";
-    private String mMethodString = "&method=";
 
-    // List of image titles
-    private final String image_titles[] = {
-            "Img1",
-            "Img2",
-            "Img3",
-            "Img4",
-            "Img5",
-            "Img6",
-            "Img7",
-            "Img8",
-            "Img9",
-            "Img10",
-            "Img11",
-            "Img12",
-            "Img13",
-    };
 
-    // List of image ids
-    private final Integer image_ids[] = {
-            R.drawable.touch_icon_0,
-            R.drawable.touch_icon_0,
-            R.drawable.touch_icon_0,
-            R.drawable.touch_icon_0,
-            R.drawable.touch_icon_0,
-            R.drawable.touch_icon_0,
-            R.drawable.touch_icon_0,
-            R.drawable.touch_icon_0,
-            R.drawable.touch_icon_0,
-            R.drawable.touch_icon_0,
-            R.drawable.touch_icon_0,
-            R.drawable.touch_icon_0,
-            R.drawable.touch_icon_0,
-    };
+//    // List of image titles
+//    private final String image_titles[] = {
+//            "Img1",
+//            "Img2",
+//            "Img3",
+//            "Img4",
+//            "Img5",
+//            "Img6",
+//            "Img7",
+//            "Img8",
+//            "Img9",
+//            "Img10",
+//            "Img11",
+//            "Img12",
+//            "Img13",
+//    };
+//
+//    // List of image ids
+//    private final Integer image_ids[] = {
+//            R.drawable.touch_icon_0,
+//            R.drawable.touch_icon_0,
+//            R.drawable.touch_icon_0,
+//            R.drawable.touch_icon_0,
+//            R.drawable.touch_icon_0,
+//            R.drawable.touch_icon_0,
+//            R.drawable.touch_icon_0,
+//            R.drawable.touch_icon_0,
+//            R.drawable.touch_icon_0,
+//            R.drawable.touch_icon_0,
+//            R.drawable.touch_icon_0,
+//            R.drawable.touch_icon_0,
+//            R.drawable.touch_icon_0,
+//    };
 
-    // Go through all the titles and make a ItemList for each to hold
-    // image information
-    private ArrayList<ItemList> prepareData() {
-        ArrayList<ItemList> image = new ArrayList<>();
-        for(int i = 0; i < image_titles.length; i++) {
-            ItemList itemList = new ItemList();
-            itemList.setImage_title(image_titles[i]);
-            itemList.setImage_ID(image_ids[i]);
-            image.add(itemList);
-        }
-        return image;
-    }
-
-    // TODO: get photos from Flickr
+    private ArrayList<String> imageUrls = new ArrayList<String>();
 
 
 
-
+    RequestQueue requestQueue;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -92,20 +82,71 @@ public class MainActivity extends AppCompatActivity {
         mRecyclerView.setHasFixedSize(true);
 
         // Initialize GridLayoutManager
-        mLayoutManager = new GridLayoutManager(getApplicationContext(), 3);
+        mLayoutManager = new GridLayoutManager(getApplicationContext(), 2);
         mRecyclerView.setLayoutManager(mLayoutManager);
 
-        ArrayList<ItemList> itemLists = prepareData();
-        GalleryImageAdapter adapter = new GalleryImageAdapter(getApplicationContext(), itemLists);
-        mRecyclerView.setAdapter(adapter);
+        // Build the url we need
+        String url = FlickrManager.build_url("flickr.people.getPublicPhotos", USER);
+        Log.d(TAG, url);
 
+        // Create Volley RequestQueue
+        requestQueue = Volley.newRequestQueue(this);
 
+        JsonObjectRequest obreq = new JsonObjectRequest(Request.Method.GET, url, new
+                Response.Listener<JSONObject>() {
+
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        Log.d(TAG, response.toString());
+
+                        try {
+                            // Parse JSON
+                            JSONObject photos = response.getJSONObject("photos");
+                            JSONArray dataArray = photos.getJSONArray("photo");
+                            int thumbnailsCount = dataArray.length();
+
+                            // Go through all the images and get the url for each one
+                            for (int i = 0; i < thumbnailsCount; i++) {
+                                JSONObject thumbnail = dataArray.getJSONObject(i);
+                                String farm = thumbnail.getString("farm");
+                                String server = thumbnail.getString("server");
+                                String id = thumbnail.getString("id");
+                                String secret = thumbnail.getString("secret");
+
+                                String imageUrl = String.format("https://farm%s.staticflickr" +
+                                        ".com/%s/%s_%s.jpg", farm, server, id, secret);
+                                Log.d(TAG, imageUrl);
+                                imageUrls.add(imageUrl);
+                            }
+
+                            // Set the adapter
+                            GalleryImageAdapter adapter = new GalleryImageAdapter(
+                                    getApplicationContext(), imageUrls);
+                            mRecyclerView.setAdapter(adapter);
+
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                            Toast.makeText(getApplicationContext(), "Error: " + e.getMessage(),
+                                    Toast.LENGTH_LONG).show();
+                            Log.d(TAG, "Error: " + e.getMessage());
+                        }
+                    }
+                }, new Response.ErrorListener() {
+
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                VolleyLog.d(TAG, "Error: " + error.getMessage());
+                Toast.makeText(getApplicationContext(),
+                        error.getMessage(), Toast.LENGTH_LONG).show();
+                Log.d(TAG, "Error");
+
+            }
+
+        });
+
+        requestQueue.add(obreq);
     }
 }
-
-// TODO:
-// Use the url format specified by the API, then use volley/picasso to make the
-// request using the url
 
 
 
