@@ -2,7 +2,6 @@ package com.tutorial.yalegalleryapp;
 
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -38,26 +37,22 @@ public class GalleryImageAdapter extends RecyclerView.Adapter<GalleryImageAdapte
     }
 
     @Override
-    public void onBindViewHolder(final GalleryImageAdapter.ViewHolder viewHolder, int i) {
+    public void onBindViewHolder(final GalleryImageAdapter.ViewHolder viewHolder, final int i) {
         // Fill in the data from the ArrayList
-        Picasso.with(context).load(imageUrls.get(i)).resize(200, 200).centerCrop().into(viewHolder
+        Picasso.with(context).load(imageUrls.get(i)).resize(400, 400).centerCrop().into(viewHolder
                 .img);
 
         // Make the ViewHolder clickable
         viewHolder.img.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // Create intent
                 Log.d(TAG, "onClick");
-                Intent intent = new Intent(context, DetailsActivity
-                        .class);
-                Log.d(TAG, "intent created");
 
-                // Add extras to intent
-                viewHolder.img.buildDrawingCache();
-                Bitmap image = viewHolder.img.getDrawingCache();
+                // Create intent and add extras
+                Intent intent = new Intent(context, DetailsActivity.class);
                 Bundle extras = new Bundle();
-                extras.putParcelable("imagebitmap", image);
+                // Add the image url itself so the image doesn't get cropped in the details activity
+                extras.putString("imageurl", imageUrls.get(i));
                 intent.putExtras(extras);
                 Log.d(TAG, "extras added");
 

@@ -2,12 +2,11 @@ package com.tutorial.yalegalleryapp;
 
 /**
  * Created by Katherine on 1/16/17.
+ * Class used to help get photos from Flickr
  */
 
 public class FlickrManager {
-    // TODO: get photos from Flickr
     private static final String API_KEY = BuildConfig.API_KEY;
-    private static final String SECRET = BuildConfig.SECRET;
 
     private static final String flickr_base = "https://api.flickr.com/services/rest/?&method=";
     private static final String flickr_api_key = "&api_key=";

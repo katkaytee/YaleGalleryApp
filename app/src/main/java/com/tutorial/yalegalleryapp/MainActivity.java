@@ -20,7 +20,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.List;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -28,47 +27,10 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = MainActivity.class.getName();
     private static final String USER = "12208415@N08"; // User ID for yaleuniversity
 
-    private RecyclerView mRecyclerView;
-    private RecyclerView.LayoutManager mLayoutManager;
+    private RecyclerView recyclerView;
+    private RecyclerView.LayoutManager layoutManager;
 
-
-//    // List of image titles
-//    private final String image_titles[] = {
-//            "Img1",
-//            "Img2",
-//            "Img3",
-//            "Img4",
-//            "Img5",
-//            "Img6",
-//            "Img7",
-//            "Img8",
-//            "Img9",
-//            "Img10",
-//            "Img11",
-//            "Img12",
-//            "Img13",
-//    };
-//
-//    // List of image ids
-//    private final Integer image_ids[] = {
-//            R.drawable.touch_icon_0,
-//            R.drawable.touch_icon_0,
-//            R.drawable.touch_icon_0,
-//            R.drawable.touch_icon_0,
-//            R.drawable.touch_icon_0,
-//            R.drawable.touch_icon_0,
-//            R.drawable.touch_icon_0,
-//            R.drawable.touch_icon_0,
-//            R.drawable.touch_icon_0,
-//            R.drawable.touch_icon_0,
-//            R.drawable.touch_icon_0,
-//            R.drawable.touch_icon_0,
-//            R.drawable.touch_icon_0,
-//    };
-
-    private ArrayList<String> imageUrls = new ArrayList<String>();
-
-
+    private ArrayList<String> imageUrls = new ArrayList<>();
 
     RequestQueue requestQueue;
 
@@ -78,12 +40,17 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         // Initialize RecyclerView
-        mRecyclerView = (RecyclerView)findViewById(R.id.image_gallery);
-        mRecyclerView.setHasFixedSize(true);
+        recyclerView = (RecyclerView)findViewById(R.id.image_gallery);
+        recyclerView.setHasFixedSize(true);
 
         // Initialize GridLayoutManager
-        mLayoutManager = new GridLayoutManager(getApplicationContext(), 2);
-        mRecyclerView.setLayoutManager(mLayoutManager);
+        layoutManager = new GridLayoutManager(getApplicationContext(), 2);
+        recyclerView.setLayoutManager(layoutManager);
+
+        // Set the adapter
+        final GalleryImageAdapter adapter = new GalleryImageAdapter(
+                getApplicationContext(), imageUrls);
+        recyclerView.setAdapter(adapter);
 
         // Build the url we need
         String url = FlickrManager.build_url("flickr.people.getPublicPhotos", USER);
@@ -119,10 +86,9 @@ public class MainActivity extends AppCompatActivity {
                                 imageUrls.add(imageUrl);
                             }
 
-                            // Set the adapter
-                            GalleryImageAdapter adapter = new GalleryImageAdapter(
-                                    getApplicationContext(), imageUrls);
-                            mRecyclerView.setAdapter(adapter);
+                            // Make sure to notify the adapter
+                            adapter.notifyDataSetChanged();
+
 
                         } catch (JSONException e) {
                             e.printStackTrace();
@@ -135,16 +101,21 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onErrorResponse(VolleyError error) {
+                // Handle Error
                 VolleyLog.d(TAG, "Error: " + error.getMessage());
                 Toast.makeText(getApplicationContext(),
                         error.getMessage(), Toast.LENGTH_LONG).show();
                 Log.d(TAG, "Error");
-
             }
-
         });
 
         requestQueue.add(obreq);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();;
+        requestQueue.cancelAll(this);
     }
 }
 
